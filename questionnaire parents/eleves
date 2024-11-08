@@ -1,0 +1,159 @@
+import React, { useState } from 'react';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { AlertCircle } from 'lucide-react';
+
+const Quiz = () => {
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [showResults, setShowResults] = useState(false);
+  const [scores, setScores] = useState({ en: 0, hsd: 0 });
+
+  const questions = [
+    {
+      question: "Quel est votre projet de mobilité internationale ?",
+      options: [
+        { text: "Nous envisageons un retour en France", scores: { en: 2, hsd: 0 } },
+        { text: "Nous prévoyons de rester aux États-Unis", scores: { en: 0, hsd: 2 } },
+        { text: "Nous sommes ouverts à toutes les possibilités", scores: { en: 1, hsd: 1 } }
+      ]
+    },
+    {
+      question: "Quel est le niveau de français de l'élève ?",
+      options: [
+        { text: "Niveau natif/très avancé", scores: { en: 2, hsd: 1 } },
+        { text: "Niveau intermédiaire", scores: { en: 0, hsd: 2 } },
+        { text: "Niveau débutant à intermédiaire", scores: { en: 0, hsd: 2 } }
+      ]
+    },
+    {
+      question: "Quelle approche pédagogique préférez-vous ?",
+      options: [
+        { text: "Programme structuré et exigeant", scores: { en: 2, hsd: 0 } },
+        { text: "Progression personnalisée et flexible", scores: { en: 0, hsd: 2 } },
+        { text: "Un mélange des deux approches", scores: { en: 1, hsd: 1 } }
+      ]
+    },
+    {
+      question: "Quels sont vos objectifs pour les études supérieures ?",
+      options: [
+        { text: "Études en France ou reconnaissance internationale", scores: { en: 2, hsd: 0 } },
+        { text: "Études aux États-Unis principalement", scores: { en: 0, hsd: 2 } },
+        { text: "Pas encore décidé", scores: { en: 1, hsd: 1 } }
+      ]
+    },
+    {
+      question: "Quelle importance accordez-vous à la double culture académique ?",
+      options: [
+        { text: "Très importante, avec équilibre parfait", scores: { en: 2, hsd: 1 } },
+        { text: "Importante, avec focus sur le système américain", scores: { en: 0, hsd: 2 } },
+        { text: "Importante, avec focus sur le système français", scores: { en: 2, hsd: 0 } }
+      ]
+    }
+  ];
+
+  const handleAnswer = (scores) => {
+    setScores(prev => ({
+      en: prev.en + scores.en,
+      hsd: prev.hsd + scores.hsd
+    }));
+
+    if (currentQuestion < questions.length - 1) {
+      setCurrentQuestion(prev => prev + 1);
+    } else {
+      setShowResults(true);
+    }
+  };
+
+  const restart = () => {
+    setCurrentQuestion(0);
+    setShowResults(false);
+    setScores({ en: 0, hsd: 0 });
+  };
+
+  const getRecommendation = () => {
+    const totalScore = scores.en + scores.hsd;
+    const enPercentage = (scores.en / totalScore) * 100;
+    const hsdPercentage = (scores.hsd / totalScore) * 100;
+
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <AlertCircle className="text-blue-500" />
+          <h3 className="font-semibold">Résultats de l'analyse</h3>
+        </div>
+        
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <span>Voie Éducation Nationale</span>
+            <span className="font-semibold">{Math.round(enPercentage)}%</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2.5">
+            <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${enPercentage}%` }}></div>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <span>Voie High School Diploma Français</span>
+            <span className="font-semibold">{Math.round(hsdPercentage)}%</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2.5">
+            <div className="bg-purple-600 h-2.5 rounded-full" style={{ width: `${hsdPercentage}%` }}></div>
+          </div>
+        </div>
+
+        <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+          <h4 className="font-semibold mb-2">Recommandation :</h4>
+          <p>{enPercentage > hsdPercentage ? 
+            "La Voie Éducation Nationale semble plus adaptée à votre profil. Cette voie vous permettra de bénéficier d'une reconnaissance internationale tout en maintenant un haut niveau académique dans les deux cultures." :
+            "La Voie High School Diploma Français paraît plus appropriée pour votre situation. Cette voie vous offrira plus de flexibilité tout en maintenant un lien fort avec la culture française."
+          }</p>
+        </div>
+
+        <Button onClick={restart} className="w-full mt-4">
+          Recommencer le questionnaire
+        </Button>
+      </div>
+    );
+  };
+
+  return (
+    <Card className="w-full max-w-2xl mx-auto">
+      <CardHeader>
+        <h2 className="text-2xl font-bold text-center">
+          Questionnaire d'orientation OFALycée
+        </h2>
+      </CardHeader>
+      <CardContent>
+        {!showResults ? (
+          <div className="space-y-6">
+            <div className="text-sm text-gray-500 text-center">
+              Question {currentQuestion + 1} sur {questions.length}
+            </div>
+            
+            <h3 className="text-lg font-semibold mb-4">
+              {questions[currentQuestion].question}
+            </h3>
+            
+            <div className="space-y-3">
+              {questions[currentQuestion].options.map((option, index) => (
+                <Button
+                  key={index}
+                  onClick={() => handleAnswer(option.scores)}
+                  className="w-full text-left justify-start h-auto py-3 px-4"
+                  variant="outline"
+                >
+                  {option.text}
+                </Button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          getRecommendation()
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+export default Quiz;
